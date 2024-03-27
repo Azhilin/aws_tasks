@@ -50,6 +50,7 @@ public class IamRoleTest extends AbstractTest {
         GetRoleRequest roleRequest = GetRoleRequest.builder()
                 .roleName(roleNameExpected)
                 .build();
+
         try {
             return nonNull(iamClient.getRole(roleRequest));
         } catch (IamException ex) {
