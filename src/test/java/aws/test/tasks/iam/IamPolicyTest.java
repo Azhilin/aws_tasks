@@ -1,6 +1,7 @@
 package aws.test.tasks.iam;
 
 import com.google.gson.*;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,7 +52,7 @@ public class IamPolicyTest {
     }
 
     @BeforeClass
-    public static void initParams() {
+    public static void init() {
         String awsProfile = System.getProperty("awsProfile");
         iam = IamClient
                 .builder()
@@ -60,8 +61,13 @@ public class IamPolicyTest {
                 .build();
     }
 
+    @AfterClass
+    public static void close() {
+        iam.close();
+    }
+
     @Test()
-    public void testIam() {
+    public void testIamPolicy() {
         List<Policy> policies = iam.listPolicies().policies();
 
         Optional<Policy> optionalPolicyMatching = policies
