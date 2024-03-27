@@ -50,17 +50,13 @@ public class IamRoleTest extends AbstractTest {
         GetRoleRequest roleRequest = GetRoleRequest.builder()
                 .roleName(roleNameExpected)
                 .build();
-
-        boolean ifExist = false;
-
         try {
-            ifExist = nonNull(iamClient.getRole(roleRequest));
+            return nonNull(iamClient.getRole(roleRequest));
         } catch (IamException ex) {
             System.err.println(ex.awsErrorDetails().errorMessage());
             System.exit(1);
         }
-
-        return ifExist;
+        return false;
     }
 
     private List<AttachedPolicy> retrievePoliciesByRoleName() {

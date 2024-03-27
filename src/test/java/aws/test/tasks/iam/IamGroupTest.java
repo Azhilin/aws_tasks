@@ -49,17 +49,13 @@ public class IamGroupTest extends AbstractTest {
         GetGroupRequest groupRequest = GetGroupRequest.builder()
                 .groupName(groupNameExpected)
                 .build();
-
-        boolean ifExist = false;
-
         try {
-            ifExist = nonNull(iamClient.getGroup(groupRequest));
+            return nonNull(iamClient.getGroup(groupRequest));
         } catch (IamException ex) {
             System.err.println(ex.awsErrorDetails().errorMessage());
             System.exit(1);
         }
-
-        return ifExist;
+        return false;
     }
 
     private List<AttachedPolicy> retrievePoliciesByGroupName() {

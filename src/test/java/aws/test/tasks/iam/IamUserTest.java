@@ -54,16 +54,14 @@ public class IamUserTest extends AbstractTest {
                 .userName(userNameExpected)
                 .build();
 
-        boolean ifExist = false;
-
         try {
-            ifExist = nonNull(iamClient.getUser(userRequest));
+            return nonNull(iamClient.getUser(userRequest));
         } catch (IamException ex) {
             System.err.println(ex.awsErrorDetails().errorMessage());
             System.exit(1);
         }
 
-        return ifExist;
+        return false;
     }
 
     public List<Group> getGroupsForUser() {
