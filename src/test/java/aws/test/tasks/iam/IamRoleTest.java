@@ -45,7 +45,6 @@ public class IamRoleTest extends AbstractTest {
                 policyNameExpected,
                 policies.get(0).policyName());
     }
-
     private boolean ifRoleExist() {
         GetRoleRequest roleRequest = GetRoleRequest.builder()
                 .roleName(roleNameExpected)
