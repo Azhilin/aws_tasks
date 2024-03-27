@@ -1,14 +1,8 @@
 package aws.test.tasks.iam;
 
 import com.google.gson.*;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.model.*;
 import software.amazon.awssdk.utils.StringUtils;
 
@@ -24,11 +18,8 @@ import static java.lang.String.valueOf;
 import static org.junit.Assert.*;
 
 //CXQA-IAM-01: 3 IAM policies are created according to the following requirements:
-@RunWith(Parameterized.class)
-public class IamPolicyTest {
+public class IamPolicyTest extends AbstractTest {
     private static final String[] INVALID_SYMBOLS = {"\"", "[", "]", " "};
-    private static final Region REGION = Region.EU_NORTH_1;
-    private static IamClient iam;
 
     @Parameterized.Parameter
     public String policyNameExpected;
@@ -51,24 +42,9 @@ public class IamPolicyTest {
         });
     }
 
-    @BeforeClass
-    public static void init() {
-        String awsProfile = System.getProperty("awsProfile");
-        iam = IamClient
-                .builder()
-                .credentialsProvider(ProfileCredentialsProvider.create(awsProfile))
-                .region(REGION)
-                .build();
-    }
-
-    @AfterClass
-    public static void close() {
-        iam.close();
-    }
-
     @Test()
     public void testIamPolicy() {
-        List<Policy> policies = iam.listPolicies().policies();
+        List<Policy> policies = iamClient.listPolicies().policies();
 
         Optional<Policy> optionalPolicyMatching = policies
                 .stream()
@@ -132,11 +108,11 @@ public class IamPolicyTest {
 
     private JsonObject retrievePolicyJson(String policyArn) {
         GetPolicyRequest request = GetPolicyRequest.builder().policyArn(policyArn).build();
-        GetPolicyResponse response = iam.getPolicy(request);
+        GetPolicyResponse response = iamClient.getPolicy(request);
 
         GetPolicyVersionRequest policyVersionRequest = GetPolicyVersionRequest
                 .builder().policyArn(policyArn).versionId(response.policy().defaultVersionId()).build();
-        GetPolicyVersionResponse policyVersionResponse = iam.getPolicyVersion(policyVersionRequest);
+        GetPolicyVersionResponse policyVersionResponse = iamClient.getPolicyVersion(policyVersionRequest);
 
         // Parse policy JSON using Gson
         JsonElement jsonElement = JsonParser.parseString(policyVersionResponse.policyVersion().document());

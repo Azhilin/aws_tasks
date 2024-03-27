@@ -1,13 +1,7 @@
 package aws.test.tasks.iam;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.model.*;
 
 import java.util.Arrays;
@@ -19,12 +13,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 //CXQA-IAM-03: 3 IAM users groups are created according to the following requirements:
-@RunWith(Parameterized.class)
-public class IamGroupTest {
-
-    private static final Region REGION = Region.EU_NORTH_1;
-    private static IamClient iamClient;
-
+public class IamGroupTest extends AbstractTest {
     @Parameterized.Parameter
     public String groupNameExpected;
 
@@ -40,30 +29,15 @@ public class IamGroupTest {
         });
     }
 
-    @BeforeClass
-    public static void initParams() {
-        String awsProfile = System.getProperty("awsProfile");
-        iamClient = IamClient
-                .builder()
-                .credentialsProvider(ProfileCredentialsProvider.create(awsProfile))
-                .region(REGION)
-                .build();
-    }
-
-    @AfterClass
-    public static void close() {
-        iamClient.close();
-    }
-
     @Test()
     public void testIamGroup() {
-        //Check if role with roleNameExpected created
-        assertTrue(String.format("Role with the name '%s' is not created.", groupNameExpected), ifGroupExist());
+        //Check if group with groupNameExpected created
+        assertTrue(String.format("Group with the name '%s' is not created.", groupNameExpected), ifGroupExist());
 
         //Get list of attached policies
         List<AttachedPolicy> policies = retrievePoliciesByGroupName();
 
-        //Check Role Policies
+        //Check Group Policies
         assertEquals(String.format("More than 1 policy attached.\nExpected: %s\nActual: %s", policyNameExpected, policies),
                 1, policies.size());
         assertEquals(String.format("Attached Policy contains invalid name.\nExpected: %s\nActual: %s", policyNameExpected, policies),
@@ -80,15 +54,16 @@ public class IamGroupTest {
 
         try {
             ifExist = nonNull(iamClient.getGroup(groupRequest));
-        } catch (Exception ex) {
-
+        } catch (IamException ex) {
+            System.err.println(ex.awsErrorDetails().errorMessage());
+            System.exit(1);
         }
 
         return ifExist;
     }
 
     private List<AttachedPolicy> retrievePoliciesByGroupName() {
-        // Create request to get policies attached to the role
+        // Create request to get policies attached to the group
         ListAttachedGroupPoliciesRequest listAttachedGroupPoliciesRequest =
                 ListAttachedGroupPoliciesRequest.builder().groupName(groupNameExpected).build();
 

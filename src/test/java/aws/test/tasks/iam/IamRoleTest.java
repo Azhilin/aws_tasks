@@ -1,17 +1,8 @@
 package aws.test.tasks.iam;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.iam.IamClient;
-import software.amazon.awssdk.services.iam.model.AttachedPolicy;
-import software.amazon.awssdk.services.iam.model.GetRoleRequest;
-import software.amazon.awssdk.services.iam.model.ListAttachedRolePoliciesRequest;
-import software.amazon.awssdk.services.iam.model.ListAttachedRolePoliciesResponse;
+import software.amazon.awssdk.services.iam.model.*;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,11 +13,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 //CXQA-IAM-02: 3 IAM roles are created according to the following requirements:
-@RunWith(Parameterized.class)
-public class IamRoleTest {
-
-    private static final Region REGION = Region.EU_NORTH_1;
-    private static IamClient iamClient;
+public class IamRoleTest extends AbstractTest {
 
     @Parameterized.Parameter
     public String roleNameExpected;
@@ -41,21 +28,6 @@ public class IamRoleTest {
                 {"FullAccessRoleS3", "FullAccessPolicyS3"},
                 {"ReadAccessRoleS3", "ReadAccessPolicyS3"}
         });
-    }
-
-    @BeforeClass
-    public static void initParams() {
-        String awsProfile = System.getProperty("awsProfile");
-        iamClient = IamClient
-                .builder()
-                .credentialsProvider(ProfileCredentialsProvider.create(awsProfile))
-                .region(REGION)
-                .build();
-    }
-
-    @AfterClass
-    public static void close() {
-        iamClient.close();
     }
 
     @Test()
@@ -83,8 +55,9 @@ public class IamRoleTest {
 
         try {
             ifExist = nonNull(iamClient.getRole(roleRequest));
-        } catch (Exception ex) {
-
+        } catch (IamException ex) {
+            System.err.println(ex.awsErrorDetails().errorMessage());
+            System.exit(1);
         }
 
         return ifExist;
