@@ -37,3 +37,6 @@ build/
 ### Mac OS ###
 .DS_Store
 /.idea/
+/.allure/
+/key.pem
+/cloudxinfo-eu-west-1.pem
